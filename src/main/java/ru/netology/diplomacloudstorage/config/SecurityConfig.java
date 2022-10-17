@@ -1,14 +1,16 @@
 package ru.netology.diplomacloudstorage.config;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,30 +27,39 @@ import javax.servlet.http.HttpServletResponse;
 
 import static java.lang.String.format;
 
+@Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(
+        securedEnabled = true,
+        jsr250Enabled = true,
+        prePostEnabled = true
+)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserRepository userRepository;
     private final JwtTokenFilter jwtTokenFilter;
 
-
-    public SecurityConfig(UserRepository userRepository, JwtTokenFilter jwtTokenFilter) {
+    public SecurityConfig(UserRepository userRepository,
+                          JwtTokenFilter jwtTokenFilter) {
         super();
         this.userRepository = userRepository;
         this.jwtTokenFilter = jwtTokenFilter;
+
+        SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(username -> (UserDetails) userRepository
+        auth.userDetailsService(username -> userRepository
                 .findByUsername(username)
                 .orElseThrow(
                         () -> new UsernameNotFoundException(
-                                format("User: %s, not found!", username)
+                                format("User: %s, is not found", username)
                         )
                 ));
     }
 
+    // Set password encoding schema
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -56,7 +67,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        // Enable CORS and disable CSRF
         http = http.cors().and().csrf().disable();
 
         http = http
@@ -93,19 +103,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new CorsFilter(source);
     }
 
-    public UserRepository getUserRepository() {
-        return userRepository;
-    }
-
-    @Override @Bean
+    @Override
+    @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
-    };
+    }
 
     @Bean
     public HttpFirewall allowUrlSemicolonHttpFirewall() {
         StrictHttpFirewall firewall = new StrictHttpFirewall();
         firewall.setAllowSemicolon(true);
         return firewall;
+    }
+
+    public UserRepository getUserRepository() {
+        return userRepository;
     }
 }

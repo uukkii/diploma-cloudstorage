@@ -1,7 +1,6 @@
 package ru.netology.diplomacloudstorage.security;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,41 +24,36 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private final JwtTokenUtil jwtTokenUtil;
     private final UserRepository userRepository;
 
-    public JwtTokenFilter(JwtTokenUtil jwtTokenUtil, UserRepository userRepository) {
-        this.jwtTokenUtil = jwtTokenUtil;
-        this.userRepository = userRepository;
-    }
-
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header == null || !header.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain chain) throws ServletException, IOException {
+
+        final String token = request.getHeader("auth-token");
+        if (token == null || !token.startsWith("Bearer ")) {
+            chain.doFilter(request, response);
             return;
         }
 
-        final String token = header.split(" ")[1].trim();
-        if (!jwtTokenUtil.validate(token)) {
-            filterChain.doFilter(request, response);
+        final String jwtToken = token.split(" ")[1].trim();
+        if (!jwtTokenUtil.validate(jwtToken)) {
+            chain.doFilter(request, response);
             return;
         }
 
-        UserDetails userDetails = (UserDetails) userRepository
-                .findByUsername(jwtTokenUtil.getUsername(token))
+        UserDetails userDetails = userRepository
+                .findByUsername(jwtTokenUtil.getUsername(jwtToken))
                 .orElse(null);
 
         UsernamePasswordAuthenticationToken
                 authentication = new UsernamePasswordAuthenticationToken(
                 userDetails, null,
-                userDetails == null ?
-                        List.of() : userDetails.getAuthorities()
+                userDetails == null ? List.of() : userDetails.getAuthorities()
         );
 
-        authentication.setDetails(
-                new WebAuthenticationDetailsSource().buildDetails(request)
-        );
+        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        filterChain.doFilter(request, response);
+        chain.doFilter(request, response);
     }
 }

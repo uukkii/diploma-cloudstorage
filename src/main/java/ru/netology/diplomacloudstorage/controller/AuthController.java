@@ -22,30 +22,24 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
-    private final UserService userService;
-
-    public AuthController(AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil, UserService userService) {
-        this.authenticationManager = authenticationManager;
-        this.jwtTokenUtil = jwtTokenUtil;
-        this.userService = userService;
-    }
-
-    @PostMapping("/login")
+    private final UserService usersService;
+    
+    private final static String LOGIN_PATH = "/login";
+    private final static String SIGNIN_PATH = "/signin";
+    
+    @PostMapping(LOGIN_PATH)
     public AuthorizationToken login(@RequestBody @Valid Identity identity) {
-        Authentication authentication = authenticationManager
+
+        Authentication authenticate = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(identity.getLogin(), identity.getPassword()));
-        User user = (User) authentication.getPrincipal();
+
+        User user = (User) authenticate.getPrincipal();
+
         return new AuthorizationToken(jwtTokenUtil.generateToken(user));
     }
 
-    @PostMapping("/singin")
+    @PostMapping(SIGNIN_PATH)
     public User signin(@RequestBody @Valid Identity identity) {
-        return userService.createUserAccount(identity);
+        return usersService.createUserAccount(identity);
     }
 }
-
-
-
-
-
-

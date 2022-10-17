@@ -21,10 +21,10 @@ public class File {
     protected long id;
 
     @Column(nullable = false)
-    protected String fileName;
+    protected String filename;
 
     @Column(nullable = false)
-    protected String initialFileName;
+    protected String initialFilename;
 
     @Column(nullable = false)
     protected String contentType;
@@ -45,12 +45,12 @@ public class File {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         File file = (File) o;
-        return id == file.id && size == file.size && file.equals(file.fileName) && Objects.equals(initialFileName, file.initialFileName) && Objects.equals(contentType, file.contentType) && Arrays.equals(bytes, file.bytes);
+        return id == file.id && size == file.size && file.equals(file.filename) && Objects.equals(initialFilename, file.initialFilename) && Objects.equals(contentType, file.contentType) && Arrays.equals(bytes, file.bytes);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(id, fileName, initialFileName, contentType, size);
+        int result = Objects.hash(id, filename, initialFilename, contentType, size);
         result = 31 * result + Arrays.hashCode(bytes);
         return result;
     }
@@ -58,8 +58,8 @@ public class File {
     @Override
     public String toString() {
         return "File[" +
-                "fileName='" + fileName + '\'' +
-                ", initialFileName='" + initialFileName + '\'' +
+                "filename='" + filename + '\'' +
+                ", initialFilename='" + initialFilename + '\'' +
                 ", contentType='" + contentType + '\'' +
                 ", size=" + size +
                 ']';

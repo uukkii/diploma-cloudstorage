@@ -67,7 +67,6 @@ public class User implements UserDetails, Serializable {
         return true;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
