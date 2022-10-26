@@ -4,10 +4,10 @@ services:
     image: mysql
     restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_ROOT_PASSWORD=mysql
       - MYSQL_DATABASE=mysql
-      - MYSQL_USER=mysql
-      - MYSQL_PASSWORD=root
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=mysql
     ports:
       - "3306:3306"
 
@@ -21,8 +21,8 @@ services:
       - app-mysqldb
     environment:
       - DATABASE_HOST=app-mysqldb
-      - DATABASE_USER=mysql
-      - DATABASE_PASSWORD=root
-      - DATABASE_NAME=mysql
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=mysql
+      - DATABASE_NAME=root
       - DATABASE_PORT=3306
       - SPRING_DATASOURCE_URL=jdbc:mysql://app-mysqldb:3306/mysql?autoReconnect=false&useSSL=false&allowPublicKeyRetrieval=true
