@@ -20,7 +20,7 @@ public interface FileRepository extends JpaRepository<File, Long> {
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("update File c set c.filename = :filename where c.id = :id")
-    void editFileName(@Param("fileName") String filename, @Param("id") long id);
+    void editFileName(@Param("filename") String filename, @Param("id") long id);
 
     List<FileInfo> findAllByUser(User user);
 }

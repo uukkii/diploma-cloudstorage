@@ -44,7 +44,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         super();
         this.userRepository = userRepository;
         this.jwtTokenFilter = jwtTokenFilter;
-
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
     }
 
@@ -59,7 +58,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 ));
     }
 
-    // Set password encoding schema
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
